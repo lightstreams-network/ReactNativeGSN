@@ -1,84 +1,26 @@
 # New GSN Relay client
 
-To send a gasless transaction, a signed transaction message is sent to a GSN (Gas Station Network) relay server that sends the transaction to the blockchain network and pays the gas fee onbehalf of the sender. 
+To send a gasless transaction, a signed transaction message is sent to a GSN (Gas Station Network) Relay Server. The Relay Server sends the transaction to the blockchain network and pays the gas fee on behalf of the sender. 
 
 **Problem**
 
-The current relay client in the `@openzeppelin` library that we are using only works in the broswer, not in a react native app. This is because it references Node.js libraries. 
+The current `RelayClient` that we are using from the the `@openzeppelin` library only works in the browser and not in a react native app like iOS. This is because there are references to incompatible Node.js libraries. 
 
 **Solution**
 
-A simple relay client needs be developed using javascript libraries that are compatible with React Native. 
+Develop a new RelayClient using javascript libraries that are compatible with React Native.
 
-Whenever a client application attempts to send a blockchain transaction the relay client needs to intercept the `sendTransaction` API call and instead send a signed message to the relay server of the GSN.
+Using `ethers.js` we can intercept the `sendTransaction` API when an attempt to send a blockchain transaction. I have created a `GsnProvider` in `/src/crypto/crypto.js` that does this.
 
-## Current Relay Client
+What needs to be further developed:
+1. In `GsnProvider` remove the incompatible dependencies (`web3`, `eth-crypto`, `RelayClient`)
+2. Modify `ethers.js` so that smart contract address, the user's private key and the user's account address are sent in the `params` of the `sendTransaction` method. Note: Make changes to the forked repo `https://github.com/lightstreams-network/ethers.js` on the branch `ls_mods`. 
+3. Create a new `RelayClient` that doesn't use the `@openzeppelin` library. See the forked repo: `https://github.com/lightstreams-network/openzeppelin-gsn-provider.git` in the branch `ls_mods`. The new `RelayClient` needs to be a lot more simple that the openzeppelin RelayClient. It should just create the a hash in the right format with a signature and then send this message to the RelayServer. The openzeppelin RelayClient is quite complex with a lot of logic that we don't need. (E.g. it allows for multiple RelayServers, we only have one right now).
 
-The following instructions shows you how to set up your local environment so that you can get the existing relay client working that uses `@openzeppelin`. You will use this to test a working transaction that is relayed via the GSN that you will then repeat using the new relay client.
+## Getting Started
 
-To set up your enviroment you will need:
+1. Install and run the project following the ReadMe.md instructions. When the Metro Bundler is running, only choose to `Run in the web browser`.
 
-1. A local Lightstreams blockchain running in `standalone` mode.
-2. A local GSN relay server.
+2. There is already a `Voter` smart contract deployed to our Sirius test network. This `Voter` smart contract can be found in the `/contracts` directory. When you run the app and click the Vote button, a message is sent to the `https://gsn.sirius.lightstreams.io/relay` url. At the url the Relay Server pays for the transactions to be added to the blockchain. You don't need to understand how this works :-)
 
-### Setting up a local Lightstreams blockchain
-
-1. Follow these instructions to install `leth`
-https://docs.lightstreams.network/products/smart-vault/getting-started/installation
-
-2. Initialise and run a local node in `standalone` mode
-
-```
-$ leth init --nodeid=1 --network=standalone
-$ leth run --nodeid=1 --network=standalone --https
-```
-
-If all is running correctly, you should see the following message:
-```
-All Leth online/offline services are up and running!
-```
-
-### Setting up a local GSN relay server
-
-
-1. Clone the following github repo:
-```
-$ git clone https://github.com/lightstreams-network/tabookey-gasless
-```
-
-2. Change directory, check out stable branch and install node modules
-```
-$ cd tabookey-gasless
-$ git checkout -b dev-lightstreams origin/stable
-$ yarn install
-```
-
-Note: You may get the following npm error: `npm ERR! cb() never called!`. This is ok.
-
-3. Create dir path and download the compiled Relay Server executive for macOS
-```
-$ mkdir -p build/server/bin/
-$ wget "https://s3.eu-central-1.amazonaws.com/lightstreams-public/gsn/latest/RelayHttpServer-osx" -O build/server/bin/RelayHttpServer
-```
-
-4. Update the permissions
-```
-$ chmod u+x build/server/bin/RelayHttpServer
-```
-
-5. Set the environment variables with default valuessou
-```
-$ cp .env.sample .env
-```
-
-5. Send stake to relay hub
-```
-$ leth wallet transfer --nodeid=1 --network=standalone --from=0xc916cfe5c83dd4fc3c3b0bf2ec2d4e401782875e --to=0xd54E368344d633763Df624b2B9cF2db3712EC390 --value=100000000000000000000
-```
-
-leth wallet transfer --nodeid=1 --network=standalone --from=0xc916cfe5c83dd4fc3c3b0bf2ec2d4e401782875e --to=0x4bfb7c5808FCc0092d2Da1DF40934696cF99737F --value=100000000000000000000
-
-5. Run the Relay Server
-```
-$ source .env && ./relay.sh
-```
+3. If you check out the branch `ios`, you can run the app in the IOS Simulator via the Metro Bundler because all the problematic libraries have been removed.
