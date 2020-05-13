@@ -31,14 +31,11 @@ class App extends Component {
 
     let contractWithSigner = contract.connect(wallet);
 
-
-    let tx = await contractWithSigner.upVote()
+    //let tx = await contractWithSigner.upVote()
     //await tx.wait();
 
-    
     let count = await contract.count();
 
-    
     this.setState({
       resultText: count.toString(),
     });
