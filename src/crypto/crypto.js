@@ -3,29 +3,32 @@ import { RELAY_URL, RELAY_ADRRESS, BLOCKCHAIN_RPC, CHAIN_ID, CHAIN_NAME } from '
 
 const inherits = require('inherits');
 const ethers = require('ethers');
-const Web3 = require('web3');
-const EthCrypto = require('eth-crypto');
 
-const web3 = new Web3(BLOCKCHAIN_RPC);
-const RelayClient = require('@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient');
+const Web3 = require('web3'); // This dependency needs to be removed
+const EthCrypto = require('eth-crypto'); // This dependency needs to be removed
+
+const web3 = new Web3(BLOCKCHAIN_RPC); // This dependency needs to be removed
+const RelayClient = require('@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient'); // This dependency needs to be removed
 
 const network = {
         chainId: parseInt(CHAIN_ID),
         name: CHAIN_NAME
     }
 
-function DebugProvider(url, network) {
+function GsnProvider(url, network) {
     ethers.providers.BaseProvider.call(this, network.chainId);
     this.subprovider = new ethers.providers.JsonRpcProvider(url, network.chainId);
 }
-inherits(DebugProvider, ethers.providers.BaseProvider);
+inherits(GsnProvider, ethers.providers.BaseProvider);
 
 
-DebugProvider.prototype.perform = async function(method, params) {
+GsnProvider.prototype.perform = async function(method, params) {
 
     if (method === "sendTransaction") {
-
+        // The voter address needs to come from the params
         const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6"
+
+        // The user's private key and account address needs to come from the params
         const identity = EthCrypto.createIdentity();
 
         let payload = {
@@ -65,8 +68,7 @@ DebugProvider.prototype.perform = async function(method, params) {
 }
 
 export const provider = (url) => {
-    //return new ethers.providers.JsonRpcProvider(url, network.chainId);
-    return new DebugProvider(url, network)
+    return new GsnProvider(url, network)
 }
 
 export const newWallet = (privateKey, provider) => {

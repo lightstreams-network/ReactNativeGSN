@@ -2,5 +2,5 @@
 
 var crypto = require("./crypto");
 
-exports.provider = crypto.provider;
+exports.GsnProvider = crypto.provider;
 exports.newWallet = crypto.newWallet;

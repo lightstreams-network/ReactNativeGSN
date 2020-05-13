@@ -9,7 +9,7 @@ const crypto = require('./src/crypto');
 const privateKey = "7dc79980cde90e81c3717e2ec03ff36f9afac2ce5ba4939ac54611c15bd22658"
 const url = "https://node.sirius.lightstreams.io:443";
 
-const provider = crypto.provider(url);
+const provider = crypto.GsnProvider(url);
 const wallet = crypto.newWallet(privateKey, provider);
 
 
@@ -43,31 +43,6 @@ class App extends Component {
       resultText: count.toString(),
     });
   }
-
- /*
-  votePressed = async () => {
-
-    const address = "0x9BFb5D5117238a2B56721D5Dbb9a1f7C93A7ae01"
-    let randomWallet = ethers.Wallet.createRandom();
-
-    let encoded = Voter.contract.methods.upVote().encodeABI();
-
-    let options = {
-        approveFunction: ()=>{ return "aaaa6ad4b4fab03bb2feaea2d54c690206e40036e4baa930760e72479da0cc5575779f9db9ef801e144b5e6af48542107f2f094649334b030e2bb44f054429b451"},
-        from: emptyAccAddr,
-        to: voterAddr,
-        txfee: 70,
-        gas_limit: 1000000
-    }
-
-    let relay_client_config = {
-        relayUrl: "https://gsn.sirius.lightstreams.io",
-        relayAddress: RELAY_HUB,
-        allowed_relay_nonce_gap: 0,
-        verbose: true
-    }
-  }*/
-
 
   render() {
     return (
