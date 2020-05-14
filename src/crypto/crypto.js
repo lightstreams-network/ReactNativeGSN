@@ -8,7 +8,7 @@ import {
 
 const inherits = require("inherits");
 const ethers = require("ethers");
-const { utils, Wallet } = ethers;
+const { utils, Wallet, getDefaultProvider } = ethers;
 const Web3 = require("web3"); // This dependency needs to be removed
 const EthCrypto = require("eth-crypto"); // This dependency needs to be removed
 
@@ -19,6 +19,7 @@ const network = {
 	chainId: parseInt(CHAIN_ID),
 	name: CHAIN_NAME
 };
+const url = "https://node.sirius.lightstreams.io:443";
 
 function GsnProvider(url, network) {
 	ethers.providers.BaseProvider.call(this, network.chainId);
@@ -31,11 +32,9 @@ GsnProvider.prototype.perform = async function (method, params) {
 	if (method === "sendTransaction") {
 		// The voter address needs to come from the params
 		const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
-		const privateKey =
-			"7dc79980cde90e81c3717e2ec03ff36f9afac2ce5ba4939ac54611c15bd22658";
 		// The user's private key and account address needs to come from the params
-		// const identity = EthCrypto.createIdentity();
-
+		const identity = await EthCrypto.createIdentity();
+		console.warn({ identity });
 		// let payload = {
 		//     params: [{
 		//         from: identity.address,
@@ -64,9 +63,10 @@ GsnProvider.prototype.perform = async function (method, params) {
 			data: "0x",
 			chainId: params.chainId
 		};
-		let wallet = new Wallet(privateKey);
-		let res = await wallet.signMessage(transactionData);
-		console.log({ res });
+		let wallet = new Wallet(identity.privateKey, provider(url));
+		console.warn("wallet instance created", { wallet });
+		let result = await wallet.sign(transactionData);
+		console.warn({ result });
 		return new Promise(function (resolve, reject) {
 			resolve(result);
 		});
