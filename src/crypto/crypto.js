@@ -34,26 +34,10 @@ GsnProvider.prototype.perform = async function (method, params) {
 		const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
 		// The user's private key and account address needs to come from the params
 		const identity = await EthCrypto.createIdentity();
-		console.warn({ identity });
-		// let payload = {
-		//     params: [{
-		//         from: identity.address,
-		//         value: null,
-		//         useGSN: true,
-		//         gas: params.gasLimit.toHexString(),
-		//         data: params.data,
-		//         gasPrice: params.gasPrice.toHexString(),
-		//         to: voterAddress,
-		//         txfee: 70,
-		//         privateKey: identity.privateKey,
-		//         relayUrl: RELAY_URL,
-		//         relayAddr: RELAY_ADRRESS
-		//     }]
-		// }
+		console.log({ identity });
 
-		// let relayClient = new RelayClient(web3, {verbose: true});
-		// let result = await relayClient.sendTransaction(payload);
 		console.log({ params });
+
 		let transactionData = {
 			nonce: 0,
 			gasLimit: 21000,
@@ -64,9 +48,30 @@ GsnProvider.prototype.perform = async function (method, params) {
 			chainId: params.chainId
 		};
 		let wallet = new Wallet(identity.privateKey, provider(url));
-		console.warn("wallet instance created", { wallet });
+		console.log("wallet instance created", { wallet });
 		let result = await wallet.sign(transactionData);
-		console.warn({ result });
+		console.log({ result });
+		try {
+			let relayRes = await fetch("https://gsn.sirius.lightstreams.io/relay", {
+				method: "POST",
+				body: JSON.stringify({
+					encodedFunction: "0xeed7c128",
+					signature: result,
+					approvalData: [],
+					from: identity.address,
+					to: voterAddress,
+					gasPrice: 500000000000,
+					gasLimit: 28667,
+					relayFee: 70,
+					RecipientNonce: 0,
+					RelayMaxNonce: 1990,
+					RelayHubAddress: "0x5e0D6a89895D8B40FCaC27d71D23CB5a989900b9"
+				})
+			});
+			console.log("response from post request to relay", relayRes);
+		} catch (err) {
+			console.log("error from post request to relay", err);
+		}
 		return new Promise(function (resolve, reject) {
 			resolve(result);
 		});
