@@ -79,18 +79,31 @@ GsnProvider.prototype.perform = async function (method, params) {
 		let result = await wallet.sign(transactionData);
 		console.log({ result });
 
-        let data = ethers.utils.sha256("0x12345")   
+        /* ###### Example of signing transactions ###### */
 
-        let signed1 = EthCrypto.sign(identity.privateKey, data);
+        let hash
+        let data
+
+        /* Method 1: The OpenZepplin way */
+        
+        data = "0x12345";
+        hash = ethers.utils.sha256(data)   
+        let signed1 = EthCrypto.sign(identity.privateKey, hash);
+
         console.log({ signed1 });
 
-        let key = new ethers.utils.SigningKey(identity.privateKey)
-
+        /* Method 2: The Ethers way */
         
-        //let data = getTransactionHash(xxxx) 
-        let _signed2 = key.signDigest(data);
-        let signed2 = ethers.utils.joinSignature(_signed2);
+        data = "0x12345";
+        // data = getTransactionHash(xxxx) <- We should generate the serialised data the same way as OpenZepplin does it.
+
+        hash = ethers.utils.sha256(data) 
+        let key = new ethers.utils.SigningKey(identity.privateKey)
+        let signed2 = ethers.utils.joinSignature(key.signDigest(hash));
+        
         console.log({ signed2 });
+
+        /* ######  ###### */
 
 		try {
 			let relayRes = await fetch("https://gsn.sirius.lightstreams.io/relay", {
