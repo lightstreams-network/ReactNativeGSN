@@ -11,10 +11,10 @@ const ethers = require("ethers");
 const { utils, Wallet, getDefaultProvider } = ethers;
 const Web3 = require("web3"); // This dependency needs to be removed
 const EthCrypto = require("eth-crypto"); // This dependency needs to be removed
-
+const ethUtils = require("ethereumjs-util"); // This dependency needs to be removed
 const web3 = new Web3(BLOCKCHAIN_RPC); // This dependency needs to be removed
 const RelayClient = require("@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient"); // This dependency needs to be removed
-
+const web3Utils = web3.utils;
 const network = {
 	chainId: parseInt(CHAIN_ID),
 	name: CHAIN_NAME
@@ -27,31 +27,57 @@ function GsnProvider(url, network) {
 }
 inherits(GsnProvider, ethers.providers.BaseProvider);
 
-/*
 function toUint256_noPrefix(int) {
-    return removeHexPrefix(ethUtils.bufferToHex(ethUtils.setLengthLeft(int, 32)));
+	return removeHexPrefix(ethUtils.bufferToHex(ethUtils.setLengthLeft(int, 32)));
 }
 
 function removeHexPrefix(hex) {
-    return hex.replace(/^0x/, '');
+	return hex.replace(/^0x/, "");
 }
+function toHexString(byteArray) {
+	return Array.from(byteArray, function (byte) {
+		return ("0" + (byte & 0xff).toString(16)).slice(-2);
+	}).join("");
+}
+function bytesToHex_noPrefix(bytes) {
+	let hex = removeHexPrefix(toHexString(bytes));
+	if (hex.length % 2 != 0) {
+		hex = "0" + hex;
+	}
+	return hex;
+}
+function serialiazeTransaction({
+	from,
+	to,
+	tx,
+	txfee,
+	gas_price,
+	gas_limit,
+	nonce,
+	relay_hub_address,
+	relay_address
+}) {
+	// let txhstr = bytesToHex_noPrefix(tx);
+	let txhstr = tx;
+	const relay_prefix = "rlx:";
 
-function getTransactionHash (from, to, tx, txfee, gas_price, gas_limit, nonce, relay_hub_address, relay_address) {
-        let txhstr = bytesToHex_noPrefix(tx)
-        let dataToHash =
-            Buffer.from(relay_prefix).toString("hex") +
-            removeHexPrefix(from)
-            + removeHexPrefix(to)
-            + txhstr
-            + toUint256_noPrefix(parseInt(txfee))
-            + toUint256_noPrefix(parseInt(gas_price))
-            + toUint256_noPrefix(parseInt(gas_limit))
-            + toUint256_noPrefix(parseInt(nonce))
-            + removeHexPrefix(relay_hub_address)
-            + removeHexPrefix(relay_address)
-        return web3Utils.sha3('0x'+dataToHash )
-    }
-    */
+	let dataToHash =
+		Buffer.from(relay_prefix).toString("hex") +
+		removeHexPrefix(from) +
+		removeHexPrefix(to) +
+		txhstr +
+		toUint256_noPrefix(parseInt(txfee)) +
+		toUint256_noPrefix(parseInt(gas_price)) +
+		toUint256_noPrefix(parseInt(gas_limit)) +
+		toUint256_noPrefix(parseInt(nonce)) +
+		removeHexPrefix(relay_hub_address) +
+		removeHexPrefix(relay_address);
+	let shaResult;
+	shaResult = web3Utils.sha3("0x" + dataToHash);
+	console.log({ shaResult });
+	return shaResult;
+	// return "0x" + dataToHash;
+}
 
 GsnProvider.prototype.perform = async function (method, params) {
 	console.log({ method });
@@ -63,7 +89,6 @@ GsnProvider.prototype.perform = async function (method, params) {
 		console.log({ identity });
 
 		console.log({ params });
-
 
 		let transactionData = {
 			nonce: 0,
@@ -79,31 +104,44 @@ GsnProvider.prototype.perform = async function (method, params) {
 		let result = await wallet.sign(transactionData);
 		console.log({ result });
 
-        /* ###### Example of signing transactions ###### */
+		/* ###### Example of signing transactions ###### */
 
-        let hash
-        let data
+		let hash;
+		let data = {
+			from: identity.address,
+			to: voterAddress,
+			tx: "0xeed7c128",
+			txfee: 70,
+			gas_price: utils.bigNumberify("20000000000"),
+			gas_limit: 21000,
+			nonce: 0,
+			relay_hub_address: "0x5e0D6a89895D8B40FCaC27d71D23CB5a989900b9",
+			relay_address: "0x5e0D6a89895D8B40FCaC27d71D23CB5a989900b9"
+		};
 
-        /* Method 1: The OpenZepplin way */
-        
-        data = "0x12345";
-        hash = ethers.utils.sha256(data)   
-        let signed1 = EthCrypto.sign(identity.privateKey, hash);
+		let serializedString = serialiazeTransaction(data);
 
-        console.log({ signed1 });
+		/* Method 1: The OpenZepplin way */
 
-        /* Method 2: The Ethers way */
-        
-        data = "0x12345";
-        // data = getTransactionHash(xxxx) <- We should generate the serialised data the same way as OpenZepplin does it.
+		// data = "0x12345";
+		hash = ethers.utils.sha256(serializedString);
 
-        hash = ethers.utils.sha256(data) 
-        let key = new ethers.utils.SigningKey(identity.privateKey)
-        let signed2 = ethers.utils.joinSignature(key.signDigest(hash));
-        
-        console.log({ signed2 });
+		let signed1 = EthCrypto.sign(identity.privateKey, hash);
 
-        /* ######  ###### */
+		console.log({ signed1 });
+
+		/* Method 2: The Ethers way */
+
+		// data = "0x12345";
+		// < - We should generate the serialised data the same way as OpenZepplin does it.
+
+		hash = ethers.utils.sha256(serializedString);
+		let key = new ethers.utils.SigningKey(identity.privateKey);
+		let signed2 = ethers.utils.joinSignature(key.signDigest(hash));
+
+		console.log({ signed2 });
+
+		/* ######  ###### */
 
 		try {
 			let relayRes = await fetch("https://gsn.sirius.lightstreams.io/relay", {
