@@ -27,6 +27,32 @@ function GsnProvider(url, network) {
 }
 inherits(GsnProvider, ethers.providers.BaseProvider);
 
+/*
+function toUint256_noPrefix(int) {
+    return removeHexPrefix(ethUtils.bufferToHex(ethUtils.setLengthLeft(int, 32)));
+}
+
+function removeHexPrefix(hex) {
+    return hex.replace(/^0x/, '');
+}
+
+function getTransactionHash (from, to, tx, txfee, gas_price, gas_limit, nonce, relay_hub_address, relay_address) {
+        let txhstr = bytesToHex_noPrefix(tx)
+        let dataToHash =
+            Buffer.from(relay_prefix).toString("hex") +
+            removeHexPrefix(from)
+            + removeHexPrefix(to)
+            + txhstr
+            + toUint256_noPrefix(parseInt(txfee))
+            + toUint256_noPrefix(parseInt(gas_price))
+            + toUint256_noPrefix(parseInt(gas_limit))
+            + toUint256_noPrefix(parseInt(nonce))
+            + removeHexPrefix(relay_hub_address)
+            + removeHexPrefix(relay_address)
+        return web3Utils.sha3('0x'+dataToHash )
+    }
+    */
+
 GsnProvider.prototype.perform = async function (method, params) {
 	console.log({ method });
 	if (method === "sendTransaction") {
@@ -37,6 +63,7 @@ GsnProvider.prototype.perform = async function (method, params) {
 		console.log({ identity });
 
 		console.log({ params });
+
 
 		let transactionData = {
 			nonce: 0,
@@ -51,6 +78,20 @@ GsnProvider.prototype.perform = async function (method, params) {
 		console.log("wallet instance created", { wallet });
 		let result = await wallet.sign(transactionData);
 		console.log({ result });
+
+        let data = ethers.utils.sha256("0x12345")   
+
+        let signed1 = EthCrypto.sign(identity.privateKey, data);
+        console.log({ signed1 });
+
+        let key = new ethers.utils.SigningKey(identity.privateKey)
+
+        
+        //let data = getTransactionHash(xxxx) 
+        let _signed2 = key.signDigest(data);
+        let signed2 = ethers.utils.joinSignature(_signed2);
+        console.log({ signed2 });
+
 		try {
 			let relayRes = await fetch("https://gsn.sirius.lightstreams.io/relay", {
 				method: "POST",
