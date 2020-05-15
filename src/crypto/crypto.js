@@ -1,5 +1,6 @@
 import {
 	RELAY_URL,
+    RELAY_HUB,
 	RELAY_ADRRESS,
 	BLOCKCHAIN_RPC,
 	CHAIN_ID,
@@ -26,43 +27,6 @@ function GsnProvider(url, network) {
 }
 inherits(GsnProvider, ethers.providers.BaseProvider);
 
-function bufferToHex (buf) {
-  buf = exports.toBuffer(buf);
-  return '0x' + buf.toString('hex');
-};
-
-function zeros(bytes) {
-  return Buffer.allocUnsafe(bytes).fill(0);
-};
-
-/*
-function setLengthLeft (msg, length, right) {
-  var buf = zeros(length);
-  msg = toBuffer(msg);
-  if (right) {
-    if (msg.length < length) {
-      msg.copy(buf);
-      return buf;
-    }
-    return msg.slice(0, length);
-  } else {
-    if (msg.length < length) {
-      msg.copy(buf, length - msg.length);
-      return buf;
-    }
-    return msg.slice(-length);
-  }
-};
-
-function bytesToHex_noPrefix(bytes) {
-    let hex = removeHexPrefix(bytes)
-    if (hex.length % 2 != 0) {
-        hex = "0" + hex;
-    }
-    return hex
-}
-*/
-
 function bytesToHex_noPrefix(bytes) {
     let hex = removeHexPrefix(bytes)
     if (hex.length % 2 != 0) {
@@ -72,7 +36,6 @@ function bytesToHex_noPrefix(bytes) {
 }
 
 function toUint256_noPrefix(int) {
-
     let hex = ethers.utils.hexlify(int)
     let padded = ethers.utils.hexZeroPad(hex, 32)
     return removeHexPrefix(padded);
@@ -108,8 +71,10 @@ function getTransactionHash (from, to, tx, txfee, gas_price, gas_limit, nonce, r
             + removeHexPrefix(relay_hub_address)
             + removeHexPrefix(relay_address)
 
-        console.log("serialised 2", dataToHash);
-        return '0x'+dataToHash
+        let hash1 = ethers.utils.keccak256('0x' + dataToHash) 
+        let msg = Buffer.concat([Buffer.from("\x19Ethereum Signed Message:\n32"), Buffer.from(removeHexPrefix(hash1), "hex")])
+        let hash2 = ethers.utils.keccak256("0x"+msg.toString('hex') )
+        return hash2;
     }
 
 GsnProvider.prototype.perform = async function (method, params) {
@@ -119,41 +84,26 @@ GsnProvider.prototype.perform = async function (method, params) {
 		const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
 		// The user's private key and account address needs to come from the params
 		const identity = await EthCrypto.createIdentity();
-
+        let key = new ethers.utils.SigningKey(identity.privateKey)
 
         let from = identity.address;
         let to = voterAddress;
-        let tx = "0xeed7c128";
+        let tx = params.data;
         let txfee = 70;
         let gas_price = "500000000000";
         let gas_limit = "28667";
         let nonce = "0";
-        let relay_hub_address = "0x5e0D6a89895D8B40FCaC27d71D23CB5a989900b9";
-        let relay_address = "0x96ec8694d70a5661d94ed4e7ba7ce70f7772e26c";
-        
+        let relay_hub_address = RELAY_HUB;
+        let relay_address = RELAY_ADRRESS;
 
-        let data = getTransactionHash(from, to, tx, txfee, gas_price, gas_limit, nonce, relay_hub_address, relay_address);
-        console.log({data})
+        let hash = getTransactionHash(from, to, tx, txfee, gas_price, gas_limit, nonce, relay_hub_address, relay_address);
+        let signed = ethers.utils.joinSignature(key.signDigest(hash));
 
-        let hash = ethers.utils.keccak256(data) 
-        console.log("hash:", hash)
-        let msg = Buffer.concat([Buffer.from("\x19Ethereum Signed Message:\n32"), Buffer.from(removeHexPrefix(hash), "hex")])
-        let hash2 = ethers.utils.keccak256("0x"+msg.toString('hex') )
-        console.log("hash 2:", hash2)
-
-        let key = new ethers.utils.SigningKey(identity.privateKey)
-        let sig = key.signDigest(hash2)
-        console.log("sig", sig)
-        let signed2 = ethers.utils.joinSignature(sig);
-
-        console.log({ signed2 });
-
-        let relayMaxNonce = (await web3.eth.getTransactionCount(RELAY_ADRRESS)) + 3;
-
+        let relayMaxNonce = (await web3.eth.getTransactionCount(relay_address)) + 3;
 
         let jsonRequestData = {
                 "encodedFunction": tx,
-                "signature": parseHexString(signed2.replace(/^0x/, '')),
+                "signature": parseHexString(signed.replace(/^0x/, '')),
                 "approvalData": [],
                 "from": from,
                 "to": to,
@@ -167,9 +117,8 @@ GsnProvider.prototype.perform = async function (method, params) {
 
         let relayRes;
 
-		try {
-            
-			relayRes = await fetch("https://gsn.sirius.lightstreams.io/relay", {
+		try { 
+			relayRes = await fetch(RELAY_URL + "/relay", {
 				method: "POST",
                 headers: {
                 'Content-Type': 'application/json'
