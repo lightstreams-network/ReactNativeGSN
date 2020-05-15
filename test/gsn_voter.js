@@ -31,6 +31,7 @@ contract('Voter', (accounts) => {
         assert.equal(hubAddr, RELAY_HUB);
 
         voterAddr = await voter.address;
+        //voterAddr = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6"
 
         // Register the Recipient in RelayHub
         const voterFundingPHTs = "10";
