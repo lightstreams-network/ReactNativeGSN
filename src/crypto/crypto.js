@@ -116,9 +116,9 @@ GsnProvider.prototype.perform = async function (method, params) {
 		let key = new ethers.utils.SigningKey(privateKey);
 
 		let signed = ethers.utils.joinSignature(key.signDigest(hash));
-
-		let relayMaxNonce = (await web3.eth.getTransactionCount(relay_address)) + 3;
-
+		let relayMaxNonce =
+			(await this.subprovider.getTransactionCount(relay_address)) + 3;
+		console.log("nonce value is", relayMaxNonce);
 		let jsonRequestData = {
 			encodedFunction: tx,
 			signature: parseHexString(signed.replace(/^0x/, "")),
