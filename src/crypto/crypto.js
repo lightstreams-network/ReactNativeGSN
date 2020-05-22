@@ -10,6 +10,7 @@ const inherits = require("inherits");
 const ethers = require("ethers");
 const Web3 = require("web3"); // This dependency needs to be removed
 const web3 = new Web3(BLOCKCHAIN_RPC); // This dependency needs to be removed
+const relayHubAbi = require('./IRelayHub');
 
 const network = {
 	chainId: parseInt(CHAIN_ID),
@@ -97,10 +98,13 @@ GsnProvider.prototype.perform = async function (method, params) {
 		let txfee = 70;
 		let gas_price = "500000000000";
 		let gas_limit = "28667";
-		let nonce = "0";
 		let relay_hub_address = RELAY_HUB;
 		let relay_address = RELAY_ADRRESS;
 		let privateKey = params.privateKey;
+
+		let provider = new ethers.providers.JsonRpcProvider(url, network.chainId);
+		let relayHub = new ethers.Contract(RELAY_HUB, relayHubAbi, provider);
+		let nonce = parseInt(await relayHub.getNonce(from));
 
 		let hash = getTransactionHash(
 			from,
@@ -116,9 +120,10 @@ GsnProvider.prototype.perform = async function (method, params) {
 		let key = new ethers.utils.SigningKey(privateKey);
 
 		let signed = ethers.utils.joinSignature(key.signDigest(hash));
+		
 		let relayMaxNonce =
 			(await this.subprovider.getTransactionCount(relay_address)) + 3;
-		console.log("nonce value is", relayMaxNonce);
+
 		let jsonRequestData = {
 			encodedFunction: tx,
 			signature: parseHexString(signed.replace(/^0x/, "")),
