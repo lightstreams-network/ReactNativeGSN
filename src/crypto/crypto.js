@@ -88,19 +88,16 @@ function getTransactionHash(
 }
 
 GsnProvider.prototype.perform = async function (method, params) {
-	console.log({ method, params });
 	if (method === "sendTransaction") {
-		// from : user Address
-		let from = params.from;
-		// to: contract address
-		let to = params.to;
+		let from = params.contract.signer.address;
+		let to = params.contract.address;
 		let tx = params.data;
 		let txfee = 70;
 		let gas_price = "500000000000";
 		let gas_limit = "28667";
 		let relay_hub_address = RELAY_HUB;
 		let relay_address = RELAY_ADRRESS;
-		let privateKey = params.privateKey;
+		let privateKey = params.contract.signer.privateKey;
 
 		let relayHub = new ethers.Contract(RELAY_HUB, relayHubAbi, this.subprovider);
 		let nonce = parseInt(await relayHub.getNonce(from));
@@ -147,7 +144,13 @@ GsnProvider.prototype.perform = async function (method, params) {
 				},
 				body: JSON.stringify(jsonRequestData)
 			});
-			console.log("response from post request to relay", relayRes);
+			data = await relayRes.json()
+			if (data.error) {
+				console.log("error from relay:", data.error);
+			} else {
+
+				console.log("response from post request to relay", data);
+			}
 		} catch (err) {
 			console.log("error from post request to relay", err);
 		}
