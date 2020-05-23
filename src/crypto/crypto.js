@@ -6,17 +6,15 @@ import {
 	CHAIN_ID,
 	CHAIN_NAME
 } from "react-native-dotenv";
+
 const inherits = require("inherits");
 const ethers = require("ethers");
-const Web3 = require("web3"); // This dependency needs to be removed
-const web3 = new Web3(BLOCKCHAIN_RPC); // This dependency needs to be removed
 const relayHubAbi = require('./IRelayHub');
 
 const network = {
 	chainId: parseInt(CHAIN_ID),
 	name: CHAIN_NAME
 };
-const url = "https://node.sirius.lightstreams.io:443";
 
 function GsnProvider(url, network) {
 	ethers.providers.BaseProvider.call(this, network.chainId);
@@ -102,8 +100,7 @@ GsnProvider.prototype.perform = async function (method, params) {
 		let relay_address = RELAY_ADRRESS;
 		let privateKey = params.privateKey;
 
-		let provider = new ethers.providers.JsonRpcProvider(url, network.chainId);
-		let relayHub = new ethers.Contract(RELAY_HUB, relayHubAbi, provider);
+		let relayHub = new ethers.Contract(RELAY_HUB, relayHubAbi, this.subprovider);
 		let nonce = parseInt(await relayHub.getNonce(from));
 
 		let hash = getTransactionHash(
