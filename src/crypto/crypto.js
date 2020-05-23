@@ -7,6 +7,8 @@ import {
 	CHAIN_NAME
 } from "react-native-dotenv";
 
+import { Buffer } from 'buffer'
+
 const inherits = require("inherits");
 const ethers = require("ethers");
 const relayHubAbi = require('./IRelayHub');
