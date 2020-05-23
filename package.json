@@ -10,8 +10,6 @@
     "deploy": "FORCE_MIGRATION=true truffle migrate --reset --network"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ethereum-package": "2.2.3",
-    "@openzeppelin/gsn-provider": "git+https://github.com/lightstreams-network/openzeppelin-gsn-provider.git#ls_mods",
     "@openzeppelin/upgrades": "2.5.3",
     "@react-native-community/async-storage": "^1.10.3",
     "buffer": "^5.6.0",

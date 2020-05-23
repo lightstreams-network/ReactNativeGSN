@@ -5,12 +5,8 @@ chai.use(require('chai-as-promised'));
 const assert = chai.assert;
 
 const { Web3, GSN } = require('lightstreams-js-sdk');
-const { utils } = require('@openzeppelin/gsn-provider');
-const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
 
 const Voter = artifacts.require("Voter");
-
-//const RelayClient = require('gasless/src/js/relayclient/RelayClient');
 
 
 contract('Voter', (accounts) => {
@@ -46,9 +42,6 @@ contract('Voter', (accounts) => {
     });
 
     it('should execute upVote TX for FREE from a user without any funds', async () => {
-        const isVoterReady = await isRelayHubDeployedForRecipient(web3, voter.address);
-        assert.equal(isVoterReady, true);
-
         web3gsn = await Web3.newEngine(web3.eth.currentProvider.host);
 
         emptyAccAddr = await web3gsn.eth.personal.newAccount("secret");
