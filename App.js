@@ -23,7 +23,7 @@ import Voter from "./build/contracts/Voter.json";
 
 const ethers = require("ethers");
 
-const { EthersWallet } = require('ls-react-native-gsn-client');
+const { GsnProvider } = require('ls-react-native-gsn-client');
 
 const config = {
 	chainId: CHAIN_ID,
@@ -39,7 +39,7 @@ const privateKey = ethers.Wallet.createRandom().privateKey;
 const url = "https://node.sirius.lightstreams.io:443";
 const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
 
-const provider = EthersWallet.Keystore.newGsnProvider(config);
+const provider = GsnProvider.new(config);
 const wallet = new ethers.Wallet(privateKey, provider);
 
 class App extends Component {
