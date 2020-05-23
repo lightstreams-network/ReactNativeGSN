@@ -8,17 +8,39 @@ import {
 	AsyncStorage
 } from "react-native";
 
+import {
+	RELAY_URL,
+	RELAY_HUB,
+	RELAY_ADRRESS,
+	RELAY_FEE,
+	GAS_PRICE,
+	BLOCKCHAIN_RPC,
+	CHAIN_ID,
+	CHAIN_NAME
+} from "react-native-dotenv";
+
 import Voter from "./build/contracts/Voter.json";
 
 const ethers = require("ethers");
-const crypto = require("./src/crypto");
+
+const { EthersWallet } = require('ls-react-native-gsn-client');
+
+const config = {
+	chainId: CHAIN_ID,
+	blockchainRpc: BLOCKCHAIN_RPC,
+	relayUrl: RELAY_URL,
+	relayHub: RELAY_HUB,
+	relyAddress: RELAY_ADRRESS,
+	relayFee: RELAY_FEE,
+	gasPrice: GAS_PRICE
+}
 
 const privateKey = ethers.Wallet.createRandom().privateKey;
 const url = "https://node.sirius.lightstreams.io:443";
 const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
 
-const provider = crypto.GsnProvider(url);
-const wallet = crypto.newWallet(privateKey, provider);
+const provider = EthersWallet.Keystore.newGsnProvider(config);
+const wallet = new ethers.Wallet(privateKey, provider);
 
 class App extends Component {
 	constructor() {
