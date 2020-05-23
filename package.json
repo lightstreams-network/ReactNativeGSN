@@ -10,14 +10,10 @@
     "deploy": "FORCE_MIGRATION=true truffle migrate --reset --network"
   },
   "dependencies": {
-    "@openzeppelin/upgrades": "2.5.3",
     "@react-native-community/async-storage": "^1.10.3",
-    "buffer": "^5.6.0",
-    "eth-crypto": "^1.3.4",
     "ethers": "git+https://github.com/lightstreams-network/ethers.js.git#ls_mods",
     "expo": "~37.0.3",
-    "inherits": "^2.0.4",
-    "ls-react-native-gsn-client": "file:../ls-react-native-gsn-client",
+    "ls-react-native-gsn-client": "git+https://github.com/lightstreams-network/ls-react-native-gsn-client.git",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-37.0.1.tar.gz",
@@ -31,6 +27,5 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "dotenv": "^8.1.0"
-  },
-  "private": true
+  }
 }
