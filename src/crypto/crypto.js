@@ -2,6 +2,8 @@ import {
 	RELAY_URL,
 	RELAY_HUB,
 	RELAY_ADRRESS,
+	RELAY_FEE,
+	GAS_PRICE,
 	BLOCKCHAIN_RPC,
 	CHAIN_ID,
 	CHAIN_NAME
@@ -92,9 +94,9 @@ GsnProvider.prototype.perform = async function (method, params) {
 		let from = params.contract.signer.address;
 		let to = params.contract.address;
 		let tx = params.data;
-		let txfee = 70;
-		let gas_price = "500000000000";
-		let gas_limit = "28667";
+		let txfee = parseInt(RELAY_FEE);
+		let gas_price = GAS_PRICE;
+		let gas_limit = params.gasLimit.toString();
 		let relay_hub_address = RELAY_HUB;
 		let relay_address = RELAY_ADRRESS;
 		let privateKey = params.contract.signer.privateKey;
@@ -147,9 +149,6 @@ GsnProvider.prototype.perform = async function (method, params) {
 			data = await relayRes.json()
 			if (data.error) {
 				console.log("error from relay:", data.error);
-			} else {
-
-				console.log("response from post request to relay", data);
 			}
 		} catch (err) {
 			console.log("error from post request to relay", err);
