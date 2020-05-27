@@ -1451,47 +1451,6 @@
     "version": "0.5.8+commit.23d335f2.Emscripten.clang"
   },
   "networks": {
-    "161": {
-      "events": {
-        "0x030b0f8dcd86a031eddb071f91882edeac8173663ba775713b677b42b51be44b": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "name": "newCount",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "name": "account",
-              "type": "address"
-            }
-          ],
-          "name": "Voted",
-          "type": "event"
-        },
-        "0xb9f84b8e65164b14439ae3620df0a4d8786d896996c0282b683f9d8c08f046e8": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "name": "oldRelayHub",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "name": "newRelayHub",
-              "type": "address"
-            }
-          ],
-          "name": "RelayHubChanged",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0x1cD5dC9469a149C0A1735352560245dcAaBf2aD1",
-      "transactionHash": "0x010eea4377ede7e662e09fc316adaf56d3336480150c29365d063d7b1f80ee03"
-    },
     "162": {
       "events": {
         "0x030b0f8dcd86a031eddb071f91882edeac8173663ba775713b677b42b51be44b": {
@@ -1530,12 +1489,12 @@
         }
       },
       "links": {},
-      "address": "0xeda87f79D89cB3998c44e5CD177c85D24255F3D6",
-      "transactionHash": "0x84c096629dda3f3057bdaca467c09a1ee7a2e0415c43016ca36e7c34564c3944"
+      "address": "0x34c7b82D139B3dEA28AC2dC7CdceA3Ec10EEF0cb",
+      "transactionHash": "0x3d16fc6ff4ebe555cdc9c6ddada7335e4d22c184a10e7d6d9d699c3290e63f64"
     }
   },
   "schemaVersion": "3.1.0",
-  "updatedAt": "2020-05-12T12:58:15.882Z",
+  "updatedAt": "2020-05-27T20:02:36.421Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {

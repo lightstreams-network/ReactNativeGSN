@@ -37,7 +37,7 @@ const config = {
 
 const privateKey = ethers.Wallet.createRandom().privateKey;
 const url = "https://node.sirius.lightstreams.io:443";
-const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
+//const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
 
 const provider = GsnProvider.new(config);
 const wallet = new ethers.Wallet(privateKey, provider);
@@ -52,6 +52,8 @@ class App extends Component {
 	}
 
 	votePressed = async () => {
+		const voterAddress = Voter.networks[162].address;
+		console.log({voterAddress})
 		const abi = Voter.abi;
 		const contract = new ethers.Contract(voterAddress, abi, provider);
 
