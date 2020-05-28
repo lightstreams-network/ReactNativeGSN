@@ -5182,8 +5182,8 @@
     "version": "0.5.8+commit.23d335f2.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.1.0",
-  "updatedAt": "2020-05-27T19:45:49.854Z",
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-05-28T12:52:22.701Z",
   "devdoc": {
     "author": "Lukas Lukac, Lightstreams, 11.7.2018",
     "methods": {},

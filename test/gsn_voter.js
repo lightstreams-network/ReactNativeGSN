@@ -19,8 +19,10 @@ contract('Voter', (accounts) => {
 
     let voter;
 
-    it('should deploy Voter', async () => {
-        voter = await Voter.new();
+    it('should get deployed Voter', async () => {
+        voter = await Voter.deployed();
+        voterAddr = await voter.address;
+        console.log("voterAddr 1", voterAddr)
     });
 
     it('should initialize the GSN for Voter by configuring its RelayHub and funding it', async () => {
@@ -31,6 +33,7 @@ contract('Voter', (accounts) => {
         assert.equal(hubAddr, RELAY_HUB);
 
         voterAddr = await voter.address;
+        console.log("voterAddr 2", voterAddr)
 
         // Register the Recipient in RelayHub
         const voterFundingPHTs = "10";

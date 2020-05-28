@@ -35,55 +35,119 @@ const config = {
 	gasPrice: GAS_PRICE
 }
 
-const privateKey = ethers.Wallet.createRandom().privateKey;
 const url = "https://node.sirius.lightstreams.io:443";
-//const voterAddress = "0x4C3Bf861A9F822F06c10fE12CD912AaCC5e3A4f6";
 
-const provider = GsnProvider.new(config);
-const wallet = new ethers.Wallet(privateKey, provider);
+const privateKey1 = ethers.Wallet.createRandom().privateKey;
+const privateKey2 = ethers.Wallet.createRandom().privateKey;
+
+const gsnProvider = GsnProvider.new(config);
+const wallet1 = new ethers.Wallet(privateKey1, gsnProvider);
+
+const network = {
+	chainId: CHAIN_ID
+}
+
+const provider = new ethers.providers.JsonRpcProvider(url);
+const wallet2 = new ethers.Wallet(privateKey2, provider);
+const account2 = wallet2.address;
+
+let contract;
 
 class App extends Component {
 	constructor() {
 		super();
 		this.state = {
 			resultText: "",
+			status: "",
+			account2: wallet2.address,
+			account2Bal: 0,
 			contractDeployed: false
 		};
-	}
 
-	votePressed = async () => {
-		const voterAddress = Voter.networks[162].address;
+		let voterAddress = Voter.networks[CHAIN_ID].address;
 		console.log({voterAddress})
 		const abi = Voter.abi;
-		const contract = new ethers.Contract(voterAddress, abi, provider);
+		contract = new ethers.Contract(voterAddress, abi, provider);
 
-		let contractWithSigner = contract.connect(wallet);
-		let payload = {
-			privateKey: privateKey,
-			address: voterAddress
-		};
-
-		let tx = await contractWithSigner.upVote();
-		//await tx.wait();
-
-		let count = await contract.count();
-
-		this.setState({
-			resultText: count.toString()
+		let count = contract.count().then((count) => {
+			this.setState({
+				resultText: count.toString()
+			});
 		});
+
+		setInterval(() => {
+			wallet2.getBalance().then(balance => {
+				this.setState({
+					account2Bal: ethers.utils.formatEther(balance.toString())
+				});
+			});
+		}, 1000);
+{
+  //this will repeat every 5 seconds
+  //you can reset counter here
+}
+	}
+
+	voteGasFreePressed = async () => {
+		this.vote(wallet1);
 	};
+
+	votePayGasPressed = async () => {
+		this.vote(wallet2);
+	};
+
+	vote = async (wallet) => { 
+		this.setState({
+			status: "Please wait..."
+		});
+
+		let tx, count;
+		let contractWithSigner = contract.connect(wallet);
+		try {
+			tx = await contractWithSigner.upVote();
+			await tx.wait();
+			count = await contract.count();
+		} catch (err) {
+			this.setState({
+				status: err.message
+			});
+			return;
+		}
+
+		console.log("count", count.toString())
+		this.setState({
+			resultText: count.toString(),
+			status: ""
+		});
+	}
 
 	render() {
 		return (
 			<View style={styles.container}>
-				<TouchableOpacity
-					style={styles.bigButton}
-					onPress={() => this.votePressed()}
-				>
-					<Text style={styles.buttonText}>Vote</Text>
-				</TouchableOpacity>
+				<View >
 
-				<Text style={[{ marginTop: 30 }]}>{this.state.resultText}</Text>
+					<Text style={[{ marginTop: 10 }]}>Account: {this.state.account2}</Text>
+					<Text style={[{ marginTop: 10 }]}>Balance: {this.state.account2Bal} PHT</Text>
+
+					<TouchableOpacity
+						style={styles.bigButton}
+						onPress={() => this.votePayGasPressed()}
+					>
+						<Text style={styles.buttonText}>Vote (pay with gas)</Text>
+					</TouchableOpacity>
+
+					<TouchableOpacity
+						style={styles.bigButton}
+						onPress={() => this.voteGasFreePressed()}
+					>
+						<Text style={styles.buttonText}>Vote (gas-free)</Text>
+					</TouchableOpacity>
+				</View>
+
+				<View style={[{ alignItems: "center" }]}>
+					<Text style={[{ marginTop: 30 }]}>{this.state.resultText}</Text>
+					<Text style={[{ marginTop: 30 }]}>{this.state.status}</Text>
+				</View>
 			</View>
 		);
 	}
@@ -96,34 +160,19 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "#fff",
 		alignItems: "center",
-		justifyContent: "center"
+		alignContent: "center"
 	},
-	setValueView: {
+	buttons: {
 		flex: 1,
-		flexDirection: "row",
-		height: 100
+		flexDirection: "row"
 	},
 	bigButton: {
 		marginRight: 40,
 		marginLeft: 40,
 		marginTop: 10,
-		width: 200,
-		paddingTop: 20,
-		paddingBottom: 20,
+		padding: 10,
 		backgroundColor: "#68a0cf",
 		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: "#fff"
-	},
-	button: {
-		marginRight: 40,
-		marginLeft: 40,
-		marginTop: 10,
-		width: 100,
-		paddingTop: 10,
-		paddingBottom: 10,
-		backgroundColor: "#76788f",
-		borderRadius: 5,
 		borderWidth: 1,
 		borderColor: "#fff"
 	},
