@@ -64,8 +64,9 @@ class App extends Component {
 			contractDeployed: false
 		};
 
+		console.log("account: ", wallet2.address)
+
 		let voterAddress = Voter.networks[CHAIN_ID].address;
-		console.log({voterAddress})
 		const abi = Voter.abi;
 		contract = new ethers.Contract(voterAddress, abi, provider);
 
@@ -82,10 +83,6 @@ class App extends Component {
 				});
 			});
 		}, 1000);
-{
-  //this will repeat every 5 seconds
-  //you can reset counter here
-}
 	}
 
 	voteGasFreePressed = async () => {
@@ -114,7 +111,6 @@ class App extends Component {
 			return;
 		}
 
-		console.log("count", count.toString())
 		this.setState({
 			resultText: count.toString(),
 			status: ""
@@ -145,7 +141,7 @@ class App extends Component {
 				</View>
 
 				<View style={[{ alignItems: "center" }]}>
-					<Text style={[{ marginTop: 30 }]}>{this.state.resultText}</Text>
+					<Text style={[{ marginTop: 30 }]}>Votes: {this.state.resultText}</Text>
 					<Text style={[{ marginTop: 30 }]}>{this.state.status}</Text>
 				</View>
 			</View>
@@ -160,7 +156,8 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "#fff",
 		alignItems: "center",
-		alignContent: "center"
+		alignContent: "center",
+		justifyContent: "center"
 	},
 	buttons: {
 		flex: 1,
