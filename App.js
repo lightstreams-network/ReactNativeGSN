@@ -23,7 +23,7 @@ import Voter from "./build/contracts/Voter.json";
 
 const ethers = require("ethers");
 
-const { GsnProvider } = require('ls-react-native-gsn-client');
+const { GsnProvider } = require('lightstreams-gsn-client');
 
 const config = {
 	chainId: CHAIN_ID,

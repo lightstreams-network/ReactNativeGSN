@@ -18,7 +18,7 @@
     "ethers": "git+https://github.com/lightstreams-network/ethers.js.git#ls_mods",
     "expo": "~37.0.3",
     "lightstreams-js-sdk": "git+https://github.com/lightstreams-network/lightstreams-js-sdk.git#v0.19.5",
-    "ls-react-native-gsn-client": "git+https://github.com/lightstreams-network/ls-react-native-gsn-client.git",
+    "lightstreams-gsn-client": "git+https://github.com/lightstreams-network/lightstreams-gsn-client.git",
     "patch-package": "^6.2.0",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
